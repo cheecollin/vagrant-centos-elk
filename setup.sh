@@ -26,7 +26,6 @@ cd beats-dashboards-*
 #load beat template into elasticsearch
 curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@/vagrant/downloads/filebeat-index-template.json
 
-
 # force link config files
 sudo ln -sf /vagrant/config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 sudo ln -sf /vagrant/config/kibana.yml /etc/elasticsearch/elasticsearch.yml
