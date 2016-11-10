@@ -24,7 +24,7 @@ cd beats-dashboards-*
 ./load.sh
 
 #load beat template into elasticsearch
-curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@/vagrant/filebeat/filebeat-index-template.json
+curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@/vagrant/downloads/filebeat-index-template.json
 
 
 # force link config files
