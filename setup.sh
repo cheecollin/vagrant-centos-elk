@@ -9,12 +9,11 @@ sudo yum update -y
 # install utilities
 sudo yum install vim netstat telnet unzip ll -y
 
-# install java
-sudo yum install openjdk-7-jre-headless nginx apache2-utils -y
+# install application
+cd ~
+curl -z "jdk-8u73-linux-x64.rpm" -v -j -k -L -O -H "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u73-b02/jdk-8u73-linux-x64.rpm"
+sudo yum -y localinstall /home/vagrant/jdk-8u73-linux-x64.rpm
 sudo yum install elasticsearch kibana logstash filebeat -y
-
-#setup logstash config
-sudo cp /vagrant/config/logstash-conf.d/* /etc/logstash/conf.d/ -rf
 
 # Setup beat dashbaord
 cd ~
@@ -22,17 +21,16 @@ cp /vagrant/downloads/beats-dashboards-*.zip . -rf
 unzip beats-dashboards-*.zip
 cd beats-dashboards-*
 ./load.sh
-
-#load beat template into elasticsearch
-curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@/vagrant/downloads/filebeat-index-template.json
+rm beats-dashboards-* -rf
 
 # force link config files
-sudo ln -sf /vagrant/config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
-sudo ln -sf /vagrant/config/kibana.yml /etc/elasticsearch/elasticsearch.yml
-sudo ln -sf /vagrant/config/filebeat.yml /etc/elasticsearch/elasticsearch.yml
+sudo cp -rf /vagrant/config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+sudo chown :elasticsearch /etc/elasticsearch/elasticsearch.yml
+sudo ln -sf /vagrant/config/kibana.yml /opt/kibana/config/kibana.yml
+sudo ln -sf /vagrant/config/filebeat.yml /etc/filebeat/filebeat.yml
 
-sudo rm rm /etc/logstash/conf.d/
-sudo ln -sf /vagrant/config/logstash-conf.d/ /etc/logstash/conf.d
+sudo ln -sf /vagrant/config/logstash-conf.d/02-beats-input.conf /etc/logstash/conf.d/02-beats-input.conf
+sudo ln -sf /vagrant/config/logstash-conf.d/30-elasticsearch-output.conf /etc/logstash/conf.d/30-elasticsearch-output.conf
 
 #Setup auto start and start
 sudo chkconfig elasticsearch on
@@ -43,3 +41,6 @@ sudo service elasticsearch start
 sudo service logstash start
 sudo service kibana start
 sudo service filebeat start
+
+#load beat template into elasticsearch. after start Elasticsearch
+curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@/vagrant/downloads/filebeat-index-template.json
